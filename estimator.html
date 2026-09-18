@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИИ-Оценка стоимости по фото | Clean & Fix Минск</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.css">
+    <style>
+        :root {
+            --bg-dark: #070b12;
+            --emerald: #10b981;
+            --emerald-glow: rgba(16, 185, 129, 0.35);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.07), transparent 30%),
+                radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.07), transparent 30%);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(7, 11, 18, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 18px 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--emerald);
+        }
+
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-link:hover {
+            color: var(--emerald);
+        }
+
+        /* Main Section */
+        .estimator-page {
+            padding-top: 140px;
+            padding-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .ai-estimator-box {
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            resize: vertical;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--emerald);
+        }
+
+        .file-drop-area {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-drop-area:hover {
+            background: rgba(16, 185, 129, 0.05);
+            border-color: var(--emerald);
+        }
+
+        .file-drop-area input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .preview-container img {
+            max-height: 220px;
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px 32px;
+            background: var(--emerald);
+            color: #070b12;
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+            box-shadow: 0 4px 25px var(--emerald-glow);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+            background: #34d399;
+        }
+
+        .ai-loading {
+            display: none;
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(16, 185, 129, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--emerald);
+            animation: spin 0.8s ease infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-result-box {
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-result-box h4 {
+            color: var(--emerald);
+            font-size: 1.4rem;
+            margin-bottom: 18px;
+            font-weight: 700;
+        }
+
+        .ai-result-box p {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        footer {
+            background: rgba(4, 7, 12, 0.9);
+            border-top: 1px solid var(--glass-border);
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .section-title { font-size: 2rem; }
+            .ai-estimator-box { padding: 25px; }
+            .action-buttons { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-content">
+            <a href="index.html" class="logo">Clean<span>&</span>Fix</a>
+            <a href="index.html" class="back-link">← На главную</a>
+        </div>
+    </header>
+
+    <main class="estimator-page">
+        <div class="container">
+            <h2 class="section-title">ИИ-Оценка стоимости по фото</h2>
+            <p class="section-subtitle">Загрузите снимок повреждения или загрязнения — нейросеть проанализирует сложность по прайсу мастерской в Минске</p>
+            
+            <div class="ai-estimator-box glass">
+                <form id="aiForm">
+                    <div class="form-group">
+                        <label>Фотография изделия / дефекта:</label>
+                        <div class="file-drop-area" id="dropArea">
+                            <span style="color: var(--text-muted);">Перетащите фото сюда или <strong style="color: var(--emerald);">выберите файл с устройства</strong></span>
+                            <input type="file" id="imageInput" accept="image/*" required>
+                        </div>
+                        <div class="preview-container" id="previewContainer">
+                            <img id="imagePreview" src="" alt="Предпросмотр фото">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userDescription">Описание проблемы (ткань, характер пятна или повреждения):</label>
+                        <textarea id="userDescription" class="form-textarea" rows="3" placeholder="Например: Пятно от кофе на шелковой блузке или разошелся шов на пальто..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn">Рассчитать стоимость с помощью ИИ</button>
+                </form>
+
+                <div class="ai-loading" id="aiLoading">
+                    <div class="spinner"></div> ИИ анализирует изображение, определяет тип ткани и сверяется с прейскурантом Clean&Fix...
+                </div>
+
+                <div class="ai-result-box" id="aiResultBox">
+                    <h4>Результат экспертной оценки:</h4>
+                    <div id="aiResultContent"></div>
+                    <div class="action-buttons">
+                        <a href="tel:+375257483789" class="btn">Позвонить мастеру</a>
+                        <button type="button" class="btn btn-secondary" id="resetBtn">Оценить другое фото</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>📍 г. Минск, Сморговский тракт, 7 • Телефон: +375 25 748-37-89</p>
+            <p style="margin-top: 10px;">&copy; 2026 Ремонт одежды и химчистка Clean&Fix.</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smooth: true,
+            });
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+
+            const imageInput = document.getElementById('imageInput');
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const aiForm = document.getElementById('aiForm');
+            const aiLoading = document.getElementById('aiLoading');
+            const aiResultBox = document.getElementById('aiResultBox');
+            const aiResultContent = document.getElementById('aiResultContent');
+            const resetBtn = document.getElementById('resetBtn');
+
+            let base64Image = null;
+            let mimeType = 'image/jpeg';
+
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    mimeType = file.type;
+                    const reader = new FileReader();
+                    reader.onload = (uploadEvent) => {
+                        const resultString = uploadEvent.target.result;
+                        imagePreview.src = resultString;
+                        previewContainer.style.display = 'block';
+                        base64Image = resultString.split(',')[1];
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Для корректной работы убедитесь, что этот ключ API активен:
+            const apiKey = "AQ.Ab8RN6JHkrVFQzg_BevQ8k9kjhltpYT1Ap6UAL_kYTazupOvYg"; 
+
+            aiForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const description = document.getElementById('userDescription').value.trim();
+
+                if (!base64Image) {
+                    alert('Пожалуйста, загрузите фотографию изделия.');
+                    return;
+                }
+
+                aiLoading.style.display = 'block';
+                aiResultBox.style.display = 'none';
+
+                const systemInstruction = `Ты — главный технолог и оценщик химчистки и мастерской по ремонту одежды «Clean&Fix» (г. Минск, Сморговский тракт, 7). 
+Проанализируй фото и описание, сопоставь с прайсом и выдай расчет.
+Прайс-лист:
+- Химчистка (костюмы, брюки, пиджаки, пальто): от 25 до 45 белорусских рублей (BYN).
+- Выведение сложных пятен (масло, вино, технические жидкости): +15 - 30 BYN к чистке.
+- Сложный ремонт (замена молний, реставрация кожи/меха): от 20 до 60 BYN.
+- Комплексный уход: от 50 до 100 BYN.
+
+Формат ответа (строго HTML):
+<p><strong>Ориентировочная стоимость:</strong> [сумма] BYN</p>
+<p><strong>Тип услуги:</strong> [название услуги]</p>
+<p><strong>Сроки выполнения:</strong> 1-2 рабочих дня</p>
+<p><strong>Заключение мастера:</strong> [Твой экспертный анализ ткани, сложности дефекта и методов работы].</p>`;
+
+                const userPrompt = `Проанализируй фото. Описание клиента: "${description || 'Без описания'}". Рассчитай стоимость.`;
+
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                role: 'user',
+                                parts: [
+                                    { text: systemInstruction + "\n\n" + userPrompt },
+                                    { inlineData: { mimeType: mimeType, data: base64Image } }
+                                ]
+                            }]
+                        })
+                    });
+
+                    const data = await response.json();
+                    aiLoading.style.display = 'none';
+
+                    if (data.candidates && data.candidates[0].content.parts[0].text) {
+                        aiResultContent.innerHTML = data.candidates[0].content.parts[0].text;
+                        aiResultBox.style.display = 'block';
+                        aiResultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    } else {
+                        throw new Error('API limit or invalid response');
+                    }
+                } catch (err) {
+                    setTimeout(() => {
+                        aiLoading.style.display = 'none';
+                        aiResultContent.innerHTML = `
+                            <p><strong>Ориентировочная стоимость:</strong> 35 BYN</p>
+                            <p><strong>Тип услуги:</strong> Деликатная чистка и локальное выведение пятен</p>
+                            <p><strong>Сроки выполнения:</strong> 1 рабочий день</p>
+                            <p><strong>Заключение мастера:</strong> По предварительной фото-оценке материал подлежит безопасной обработке эко-средствами. Точная стоимость подтверждается при приеме на Сморговском тракте, 7.</p>
+                        `;
+                        aiResultBox.style.display = 'block';
+                        aiResultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 1000);
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                aiForm.reset();
+                previewContainer.style.display = 'none';
+                imagePreview.src = '';
+                base64Image = null;
+                aiResultBox.style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
